@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Copa Pistón - Match Play</title>
+    <style>
+        :root {
+            /* Paleta Ryder Cup */
+            --navy: #00205b;
+            --green: #006747;
+            --gold: #d4af37;
+            --bg-light: #f4f6f8;
+            --white: #ffffff;
+            --text-dark: #1a1a1a;
+            --text-gray: #666666;
+            --border: #e0e0e0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            padding-bottom: 100px; /* Espacio para que el contenido no quede oculto bajo el FAB */
+        }
+
+        header {
+            background-color: var(--white);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--navy);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .hero {
+            background-color: var(--navy);
+            color: var(--white);
+            padding: 30px 20px;
+            text-align: center;
+            position: relative;
+            border-bottom: 6px solid var(--green);
+        }
+
+        .hero-title {
+            font-size: 0.85rem;
+            letter-spacing: 3px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .scoreboard {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 450px;
+            margin: 0 auto;
+        }
+
+        .player-score {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .player-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px dashed transparent;
+            transition: all 0.2s;
+            cursor: text;
+        }
+        
+        .player-name:focus {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: var(--gold);
+            outline: none;
+        }
+
+        .points {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: var(--gold);
+            line-height: 1;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .vs-badge {
+            background: var(--gold);
+            color: var(--navy);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 800;
+            margin: 0 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .tabs-wrapper {
+            background: var(--white);
+            overflow-x: auto;
+            white-space: nowrap;
+            border-bottom: 1px solid var(--border);
+            scrollbar-width: none;
+        }
+        .tabs-wrapper::-webkit-scrollbar { display: none; }
+
+        .tabs {
+            display: flex;
+            padding: 0 10px;
+        }
+
+        .tab {
+            padding: 16px 20px;
+            font-weight: 700;
+            color: var(--text-gray);
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .tab.active {
+            color: var(--navy);
+            border-bottom-color: var(--navy);
+        }
+        
+        .tab.stats-tab {
+            color: var(--green);
+            margin-left: auto;
+        }
+        
+        .tab.stats-tab.active {
+            border-bottom-color: var(--green);
+        }
+
+        .content {
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .match-card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--bg-light);
+        }
+
+        .match-title {
+            font-weight: 800;
+            color: var(--navy);
+            font-size: 1.05rem;
+        }
+
+        .hcp-input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hcp-input-group label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-gray);
+        }
+
+        .hcp-input {
+            width: 55px;
+            padding: 6px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            text-align: center;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--navy);
+        }
+        
+        .hcp-input:focus {
+            outline: none;
+            border-color: var(--navy);
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-score {
+            flex: 1;
+            padding: 12px 4px;
+            border: 2px solid var(--border);
+            background: var(--white);
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-gray);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        
+        .btn-score span.pt-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            opacity: 0.8;
+        }
+
+        .btn-score.active-p1 { 
+            background: var(--navy); 
+            color: var(--white); 
+            border-color: var(--navy); 
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(0, 32, 91, 0.2);
+        }
+        .btn-score.active-tie { 
+            background: #9ca3af; 
+            color: var(--white); 
+            border-color: #9ca3af; 
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(156, 163, 175, 0.2);
+        }
+        .btn-score.active-p2 { 
+            background: var(--green); 
+            color: var(--white); 
+            border-color: var(--green); 
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(0, 103, 71, 0.2);
+        }
+
+        .stats-view {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .stats-title {
+            color: var(--navy);
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 800;
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--bg-light);
+            font-size: 0.95rem;
+        }
+
+        .stats-row.total {
+            font-weight: 800;
+            font-size: 1.1rem;
+            border-bottom: none;
+            border-top: 2px solid var(--border);
+            margin-top: 8px;
+            padding-top: 16px;
+            color: var(--navy);
+        }
+
+        .fab-add {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            border-radius: 30px;
+            background: var(--gold);
+            color: var(--navy);
+            display: none; /* OCULTO POR DEFECTO. Se muestra vía JS solo en stats */
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            height: 60px;
+            font-size: 1rem;
+            font-weight: 800;
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
+            border: none;
+            cursor: pointer;
+            z-index: 1000;
+            transition: transform 0.1s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .fab-add:active { transform: scale(0.95); }
+        .fab-add span { font-size: 1.5rem; margin-right: 8px; font-weight: 400;}
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-title">Copa Pistón</div>
+    </header>
+
+    <section class="hero">
+        <div class="hero-title">Marcador Global</div>
+        <div class="scoreboard">
+            <div class="player-score">
+                <div class="player-name" id="name1" contenteditable="true" spellcheck="false" onblur="saveNames()">Ainhoa</div>
+                <div class="points" id="total1">0</div>
+            </div>
+            <div class="vs-badge">VS</div>
+            <div class="player-score">
+                <div class="player-name" id="name2" contenteditable="true" spellcheck="false" onblur="saveNames()">Richard</div>
+                <div class="points" id="total2">0</div>
+            </div>
+        </div>
+    </section>
+
+    <div class="tabs-wrapper" id="tabsWrapper">
+        <div class="tabs" id="tabsContainer">
+            <!-- Pestañas generadas por JS -->
+        </div>
+    </div>
+
+    <main class="content" id="mainContent">
+        <!-- Tarjetas de puntos o vista de estadísticas -->
+    </main>
+
+    <!-- Botón de añadir jornada (gestionado estrictamente por JS) -->
+    <button class="fab-add" id="fabAddRound" onclick="addRound()">
+        <span>+</span> Añadir Jornada
+    </button>
+
+    <script>
+        // Clave única de almacenamiento
+        const STORAGE_KEY = 'CopaPistonTorneo_AppData'; 
+        
+        // Estructura oficial de puntos por jornada
+        const MATCH_TYPES = [
+            { id: 'f9', name: 'Front 9', hasInput: false },
+            { id: 'b9', name: 'Back 9', hasInput: false },
+            { id: 'h1', name: 'Hoyo Hcp 1', hasInput: true },
+            { id: 'h9', name: 'Hoyo Hcp 9', hasInput: true },
+            { id: 'h18', name: 'Hoyo Hcp 18', hasInput: true }
+        ];
+
+        // Estado inicial de la aplicación (5 jornadas por defecto)
+        let state = {
+            p1Name: 'Ainhoa',
+            p2Name: 'Richard',
+            rounds: Array.from({length: 5}, () => ({ results: {}, holes: {} }))
+        };
+
+        let currentTab = 0; // Puede ser número (índice de jornada) o 'stats' (tarjeta general)
+
+        // Inicialización y carga de datos
+        function init() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    state = JSON.parse(saved);
+                }
+            } catch (e) {
+                console.error("Error al cargar datos locales", e);
+            }
+            setupNameListeners();
+            renderUI();
+        }
+
+        // Guardado de estado
+        function saveState() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            renderUI();
+        }
+
+        function saveNames() {
+            const n1 = document.getElementById('name1').innerText.trim();
+            const n2 = document.getElementById('name2').innerText.trim();
+            
+            if (n1) state.p1Name = n1;
+            if (n2) state.p2Name = n2;
+            
+            saveState();
+        }
+
+        function setupNameListeners() {
+            // Evitar saltos de línea y guardar al pulsar Enter
+            const handleEnter = (e) => {
+                if(e.key === 'Enter') {
+                    e.preventDefault();
+                    e.target.blur(); // Dispara onblur y guarda
+                }
+            };
+            document.getElementById('name1').addEventListener('keydown', handleEnter);
+            document.getElementById('name2').addEventListener('keydown', handleEnter);
+        }
+
+        function addRound() {
+            state.rounds.push({ results: {}, holes: {} });
+            currentTab = state.rounds.length - 1; // Navegamos directamente a la nueva jornada
+            saveState();
+            
+            // Scroll a la nueva pestaña para asegurar visibilidad
+            setTimeout(() => {
+                const wrapper = document.getElementById('tabsWrapper');
+                wrapper.scrollLeft = wrapper.scrollWidth;
+            }, 50);
+        }
+
+        function setScore(roundIdx, pointId, winner) {
+            // Lógica Toggle: Si pulsamos el que ya está activo, se desactiva
+            if (state.rounds[roundIdx].results[pointId] === winner) {
+                delete state.rounds[roundIdx].results[pointId]; 
+            } else {
+                state.rounds[roundIdx].results[pointId] = winner;
+            }
+            saveState();
+        }
+
+        function setHole(roundIdx, pointId, value) {
+            state.rounds[roundIdx].holes[pointId] = value;
+            saveState();
+        }
+
+        function getTotals() {
+            let p1 = 0, p2 = 0;
+            state.rounds.forEach(r => {
+                Object.values(r.results).forEach(res => {
+                    if (res === 'p1') p1 += 1;
+                    else if (res === 'p2') p2 += 1;
+                    else if (res === 'tie') { p1 += 0.5; p2 += 0.5; }
+                });
+            });
+            return { p1, p2 };
+        }
+
+        function renderUI() {
+            // 1. Actualizar Marcador (Si no está siendo editado por el usuario en este instante)
+            const n1El = document.getElementById('name1');
+            const n2El = document.getElementById('name2');
+            if (document.activeElement !== n1El) n1El.innerText = state.p1Name;
+            if (document.activeElement !== n2El) n2El.innerText = state.p2Name;
+            
+            const totals = getTotals();
+            document.getElementById('total1').innerText = totals.p1;
+            document.getElementById('total2').innerText = totals.p2;
+
+            // 2. Controlar la visibilidad CRÍTICA del botón Añadir Jornada
+            const fab = document.getElementById('fabAddRound');
+            if (currentTab === 'stats') {
+                fab.style.display = 'flex'; // Solo visible en Tarjeta General
+            } else {
+                fab.style.display = 'none'; // Oculto en las jornadas
+            }
+
+            // 3. Renderizar Pestañas
+            const tabsContainer = document.getElementById('tabsContainer');
+            let tabsHtml = '';
+            state.rounds.forEach((_, idx) => {
+                tabsHtml += `<div class="tab ${currentTab === idx ? 'active' : ''}" onclick="currentTab = ${idx}; renderUI();">J${idx + 1}</div>`;
+            });
+            tabsHtml += `<div class="tab stats-tab ${currentTab === 'stats' ? 'active' : ''}" onclick="currentTab = 'stats'; renderUI();">📊 Tarjeta</div>`;
+            tabsContainer.innerHTML = tabsHtml;
+
+            // 4. Renderizar Contenido Principal
+            const mainContent = document.getElementById('mainContent');
+            if (currentTab === 'stats') {
+                mainContent.innerHTML = renderStats();
+            } else {
+                mainContent.innerHTML = renderRound(currentTab);
+            }
+        }
+
+        function renderRound(idx) {
+            const round = state.rounds[idx];
+            if (!round) return ''; 
+            
+            // Truncar nombres para que los botones mantengan buen tamaño en móviles
+            const n1 = state.p1Name.length > 8 ? state.p1Name.substring(0, 6) + '...' : state.p1Name;
+            const n2 = state.p2Name.length > 8 ? state.p2Name.substring(0, 6) + '...' : state.p2Name;
+            let html = '';
+            
+            MATCH_TYPES.forEach(p => {
+                const res = round.results[p.id];
+                const holeVal = round.holes[p.id] || '';
+                
+                let inputHtml = '';
+                if (p.hasInput) {
+                    inputHtml = `
+                        <div class="hcp-input-group">
+                            <label>Nº</label>
+                            <input type="number" class="hcp-input" value="${holeVal}" min="1" max="18" 
+                                   onchange="setHole(${idx}, '${p.id}', this.value)">
+                        </div>`;
+                }
+
+                html += `
+                <div class="match-card">
+                    <div class="match-header">
+                        <div class="match-title">${p.name}</div>
+                        ${inputHtml}
+                    </div>
+                    <div class="controls">
+                        <button class="btn-score ${res === 'p1' ? 'active-p1' : ''}" onclick="setScore(${idx}, '${p.id}', 'p1')">
+                            ${n1} <span class="pt-label">+1</span>
+                        </button>
+                        <button class="btn-score ${res === 'tie' ? 'active-tie' : ''}" onclick="setScore(${idx}, '${p.id}', 'tie')">
+                            Empate <span class="pt-label">+0.5</span>
+                        </button>
+                        <button class="btn-score ${res === 'p2' ? 'active-p2' : ''}" onclick="setScore(${idx}, '${p.id}', 'p2')">
+                            ${n2} <span class="pt-label">+1</span>
+                        </button>
+                    </div>
+                </div>`;
+            });
+            
+            return html;
+        }
+
+        function renderStats() {
+            let html = `
+                <div class="stats-view">
+                    <h3 class="stats-title">Resumen del Torneo</h3>
+                    <div class="stats-row" style="font-weight: 700; border-bottom: 2px solid var(--border);">
+                        <span style="flex:1;">Jornada</span>
+                        <span style="flex:1; text-align:center; color: var(--navy);">${state.p1Name}</span>
+                        <span style="flex:1; text-align:center; color: var(--green);">${state.p2Name}</span>
+                    </div>`;
+                    
+            const totals = getTotals();
+            
+            state.rounds.forEach((r, idx) => {
+                let p1 = 0, p2 = 0;
+                Object.values(r.results).forEach(res => {
+                    if(res === 'p1') p1 += 1;
+                    if(res === 'p2') p2 += 1;
+                    if(res === 'tie'){ p1 += 0.5; p2 += 0.5; }
+                });
+                
+                html += `
+                    <div class="stats-row">
+                        <span style="flex:1;">Jornada ${idx + 1}</span>
+                        <span style="flex:1; text-align:center; font-weight:600;">${p1}</span>
+                        <span style="flex:1; text-align:center; font-weight:600;">${p2}</span>
+                    </div>`;
+            });
+            
+            html += `
+                    <div class="stats-row total">
+                        <span style="flex:1;">TOTAL</span>
+                        <span style="flex:1; text-align:center;">${totals.p1}</span>
+                        <span style="flex:1; text-align:center;">${totals.p2}</span>
+                    </div>
+                </div>`;
+            return html;
+        }
+
+        // Arrancar la aplicación
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
